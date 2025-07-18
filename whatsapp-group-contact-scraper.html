@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WhatsApp Scraper Tool</title>
+    <style>
+        .scraper-tool {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-family: Arial, sans-serif;
+        }
+        
+        .tool-section {
+            margin-bottom: 25px;
+        }
+        
+        .tool-title {
+            color: #075E54;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+        
+        .code-box {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            position: relative;
+            margin-bottom: 10px;
+        }
+        
+        .text-box {
+            width: 100%;
+            min-height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #128C7E;
+        }
+        
+        .btn-secondary {
+            background: #555;
+        }
+        
+        .btn-secondary:hover {
+            background: #333;
+        }
+        
+        .btn-group {
+            margin-top: 15px;
+        }
+        
+        .step-list {
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+        
+        .options-group {
+            background: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #eee;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .option-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .option-item input {
+            margin-right: 10px;
+        }
+        
+        .option-label {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .options-title {
+            margin-bottom: 10px;
+            color: #075E54;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="scraper-tool">
+    <!-- Instructions Section -->
+    <div class="tool-section">
+        <h2 class="tool-title">WhatsApp Contact Extractor</h2>
+        <ol class="step-list">
+            <li>Open WhatsApp Web and go to your target group</li>
+            <li>Copy the extraction code below</li>
+            <li>Press F12 (Chrome) or Ctrl+Shift+I (Firefox) to open Developer Tools</li>
+            <li>Go to Console tab, paste the code, and press Enter</li>
+            <li>Return here and paste the results below</li>
+        </ol>
+    </div>
+
+    <!-- Code Section -->
+    <div class="tool-section">
+        <h2 class="tool-title">Extraction Code</h2>
+        <div class="code-box" id="extractionCode">
+function textToClipboard(text) {
+    var dummy = document.createElement("textarea");
+    document.body.appendChild(dummy);
+    dummy.value = text;
+    dummy.select();
+    document.execCommand("copy");
+    document.body.removeChild(dummy);
+    alert("Contacts copied to clipboard!");
+}
+var numbers = document.getElementsByClassName("copyable-text")[1].innerHTML;
+textToClipboard(numbers);</div>
+        <button class="btn" onclick="copyCode()">Copy Code</button>
+    </div>
+
+    <!-- Processing Options -->
+    <div class="options-group">
+        <h3 class="options-title">Processing Options:</h3>
+        <div class="options-grid">
+            <!-- Left Column -->
+            <div>
+                <div class="option-item">
+                    <input type="checkbox" id="optNumbers" checked>
+                    <label class="option-label" for="optNumbers">Extract Phone Numbers</label>
+                </div>
+                
+                <div class="option-item">
+                    <input type="checkbox" id="optRemoveCountry">
+                    <label class="option-label" for="optRemoveCountry">Remove Country Code (+91)</label>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div>
+                <div class="option-item">
+                    <input type="checkbox" id="optNames">
+                    <label class="option-label" for="optNames">Extract Contact Names</label>
+                </div>
+                
+                <div class="option-item">
+                    <input type="checkbox" id="optRemoveSpaces">
+                    <label class="option-label" for="optRemoveSpaces">Remove All Spaces</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Section -->
+    <div class="tool-section">
+        <h2 class="tool-title">Paste Raw Results Here</h2>
+        <textarea class="text-box" id="rawResults" placeholder="Paste the unformatted output here..."></textarea>
+    </div>
+
+    <!-- Processing Buttons -->
+    <div class="btn-group">
+        <button class="btn" onclick="processData()">Process Data</button>
+        <button class="btn btn-secondary" onclick="copyResults()">Copy Results</button>
+        <button class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+    </div>
+
+    <!-- Output Section -->
+    <div class="tool-section">
+        <h2 class="tool-title">Processed Results</h2>
+        <textarea class="text-box" id="cleanOutput" readonly></textarea>
+    </div>
+</div>
+
+<script>
+    function copyCode() {
+        const code = document.getElementById("extractionCode").textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            alert("Extraction code copied to clipboard!");
+        });
+    }
+
+    function processData() {
+        const rawText = document.getElementById("rawResults").value;
+        if (!rawText.trim()) {
+            alert("Please paste some data first!");
+            return;
+        }
+
+        let results = [];
+        const extractNumbers = document.getElementById("optNumbers").checked;
+        const extractNames = document.getElementById("optNames").checked;
+        const removeCountry = document.getElementById("optRemoveCountry").checked;
+        const removeSpaces = document.getElementById("optRemoveSpaces").checked;
+
+        // Extract components based on options
+        if (extractNumbers) {
+            const phoneRegex = /(\+?\d{1,3}[\s-]?)?(\(?\d{2,4}\)?[\s-]?)?[\d\s-]{8,}\d/g;
+            const numbers = rawText.match(phoneRegex) || [];
+            numbers.forEach(num => {
+                let processedNum = num.trim();
+                
+                if (removeCountry) {
+                    processedNum = processedNum.replace(/^\+91\s?/, '');
+                }
+                
+                if (removeSpaces) {
+                    processedNum = processedNum.replace(/\s+/g, '');
+                }
+                
+                results.push(processedNum);
+            });
+        }
+
+        if (extractNames) {
+            // Name extraction pattern (adjust as needed)
+            const nameRegex = /[A-Z][a-z]+(?: [A-Z][a-z]+)*/g;
+            const names = rawText.match(nameRegex) || [];
+            names.forEach(name => {
+                results.push(name.trim());
+            });
+        }
+
+        // Remove duplicates
+        results = [...new Set(results)];
+
+        document.getElementById("cleanOutput").value = results.join("\n");
+    }
+
+    function copyResults() {
+        const output = document.getElementById("cleanOutput");
+        if (!output.value.trim()) {
+            alert("No results to copy! Process the data first.");
+            return;
+        }
+        navigator.clipboard.writeText(output.value).then(() => {
+            alert("Results copied to clipboard!");
+        });
+    }
+
+    function clearAll() {
+        document.getElementById("rawResults").value = "";
+        document.getElementById("cleanOutput").value = "";
+    }
+</script>
+
+</body>
+</html>
